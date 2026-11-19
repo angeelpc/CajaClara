@@ -12,6 +12,31 @@ const notFound = require('./middleware/notFound');
 const app = express();
 const publicDirectory = path.join(__dirname, '..', 'public');
 
+const normalizeOrigin = (value = '') => value.trim().replace(/\/+$/, '');
+
+const toHttpsOrigin = (value = '') => {
+  const normalizedValue = normalizeOrigin(value);
+  if (!normalizedValue) return '';
+  return /^https?:\/\//i.test(normalizedValue)
+    ? normalizedValue
+    : `https://${normalizedValue}`;
+};
+
+const getAllowedOrigins = () => {
+  const configuredOrigins = (process.env.CLIENT_ORIGIN || '')
+    .split(',')
+    .map(normalizeOrigin)
+    .filter(Boolean);
+  const vercelOrigins = [
+    process.env.VERCEL_URL,
+    process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ]
+    .map(toHttpsOrigin)
+    .filter(Boolean);
+
+  return new Set([...configuredOrigins, ...vercelOrigins]);
+};
+
 app.set('trust proxy', 1);
 app.disable('x-powered-by');
 app.use(helmet({
@@ -27,12 +52,10 @@ app.use(helmet({
 }));
 app.use(cors({
   origin(origin, callback) {
-    const configuredOrigins = (process.env.CLIENT_ORIGIN || '')
-      .split(',')
-      .map((item) => item.trim())
-      .filter(Boolean);
+    const allowedOrigins = getAllowedOrigins();
+    const requestOrigin = normalizeOrigin(origin);
 
-    if (!origin || configuredOrigins.length === 0 || configuredOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.size === 0 || allowedOrigins.has(requestOrigin)) {
       return callback(null, true);
     }
 

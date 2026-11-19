@@ -13,6 +13,30 @@ const app = require('../src/app');
 describe('Autenticación', () => {
   const userId = '507f1f77bcf86cd799439011';
 
+  test('acepta el origen público asignado por Vercel', async () => {
+    const previousClientOrigin = process.env.CLIENT_ORIGIN;
+    const previousProductionUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+    process.env.CLIENT_ORIGIN = 'https://otro-dominio.example';
+    process.env.VERCEL_PROJECT_PRODUCTION_URL = 'caja-clara-chi.vercel.app';
+
+    try {
+      const response = await request(app)
+        .options('/api/auth/register')
+        .set('Origin', 'https://caja-clara-chi.vercel.app')
+        .set('Access-Control-Request-Method', 'POST');
+
+      expect(response.status).toBe(204);
+      expect(response.headers['access-control-allow-origin'])
+        .toBe('https://caja-clara-chi.vercel.app');
+    } finally {
+      if (previousClientOrigin === undefined) delete process.env.CLIENT_ORIGIN;
+      else process.env.CLIENT_ORIGIN = previousClientOrigin;
+
+      if (previousProductionUrl === undefined) delete process.env.VERCEL_PROJECT_PRODUCTION_URL;
+      else process.env.VERCEL_PROJECT_PRODUCTION_URL = previousProductionUrl;
+    }
+  });
+
   test('rechaza un registro con datos inválidos', async () => {
     const response = await request(app)
       .post('/api/auth/register')
