@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 from docx import Document
@@ -13,7 +14,9 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
 DOCS.mkdir(parents=True, exist_ok=True)
 DIAGRAM_PATH = DOCS / "diagrama-entidad-relacion.png"
-DOCX_PATH = DOCS / "Documentacion_CajaClara.docx"
+DOCX_PATH = Path(
+    os.environ.get("DOCUMENT_OUTPUT_PATH", DOCS / "Documentacion_CajaClara.docx")
+)
 
 FOREST = "173F2E"
 FOREST_DARK = "0F2D21"
@@ -437,7 +440,7 @@ def build_document():
         ("RNF 05", "Disponibilidad", "El servidor informa errores de conexión sin revelar credenciales o trazas internas."),
         ("RNF 06", "Rendimiento", "El listado admite paginación y limita cada consulta a 100 registros."),
         ("RNF 07", "Usabilidad", "La interfaz se adapta a computadora y teléfono y utiliza etiquetas accesibles."),
-        ("RNF 08", "Compatibilidad", "El proyecto requiere Node.js 20 o posterior y navegadores modernos."),
+        ("RNF 08", "Compatibilidad", "El proyecto requiere Node.js 22.13 o posterior y navegadores modernos."),
         ("RNF 09", "Mantenimiento", "La solución separa rutas, controladores, modelos, validadores y middleware."),
         ("RNF 10", "Calidad", "Cada cambio en main ejecuta Jest antes del despliegue."),
         ("RNF 11", "Observabilidad", "La aplicación ofrece una ruta de salud y registra errores internos en el servidor."),
@@ -592,7 +595,7 @@ def build_document():
     )
     pipeline_rows = [
         ("1", "Descargar", "GitHub Actions obtiene el contenido del repositorio."),
-        ("2", "Preparar", "Configura Node.js 20 y pnpm 11.25.0."),
+        ("2", "Preparar", "Configura Node.js 22.13 y pnpm 11.25.0."),
         ("3", "Instalar", "Usa pnpm install con el archivo de bloqueo."),
         ("4", "Probar", "Ejecuta las 16 pruebas y genera cobertura."),
         ("5", "Construir", "Vercel prepara los artefactos de producción."),
@@ -626,7 +629,7 @@ def build_document():
     add_heading(doc, "Enlaces de entrega", 2)
     repo_paragraph = doc.add_paragraph()
     repo_paragraph.add_run("Repositorio de GitHub  ").bold = True
-    repo_paragraph.add_run("Pendiente de publicación porque la sesión local de GitHub requiere autenticación.")
+    add_hyperlink(repo_paragraph, "Abrir repositorio CajaClara", "https://github.com/angeelpc/CajaClara")
     deploy_paragraph = doc.add_paragraph()
     deploy_paragraph.add_run("Aplicación en Vercel  ").bold = True
     deploy_paragraph.add_run("Pendiente de publicación hasta configurar MongoDB Atlas y la cuenta de Vercel.")

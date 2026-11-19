@@ -21,7 +21,7 @@ La aplicación permite registrar usuarios, iniciar y cerrar sesión, y administr
 
 ## Tecnologías
 
-- Node.js 20 o posterior
+- Node.js 22.13 o posterior
 - Express.js
 - MongoDB Atlas y Mongoose
 - JSON Web Token
@@ -177,7 +177,7 @@ Las credenciales de Vercel se guardan como secretos del repositorio y no aparece
 
 ## Enlaces de entrega
 
-- Repositorio de GitHub: pendiente de vincular con la cuenta del estudiante.
+- Repositorio de GitHub: https://github.com/angeelpc/CajaClara
 - Aplicación desplegada: pendiente de vincular con el proyecto de Vercel.
 
 ## Documentación académica
