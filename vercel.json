@@ -17,6 +17,22 @@
       "dest": "/api/index.js"
     },
     {
+      "src": "/styles.css",
+      "dest": "/public/styles.css"
+    },
+    {
+      "src": "/app.js",
+      "dest": "/public/app.js"
+    },
+    {
+      "src": "/robots.txt",
+      "dest": "/public/robots.txt"
+    },
+    {
+      "src": "/llms.txt",
+      "dest": "/public/llms.txt"
+    },
+    {
       "handle": "filesystem"
     },
     {

@@ -178,7 +178,7 @@ Las credenciales de Vercel se guardan como secretos del repositorio y no aparece
 ## Enlaces de entrega
 
 - Repositorio de GitHub: https://github.com/angeelpc/CajaClara
-- Aplicación desplegada: pendiente de vincular con el proyecto de Vercel.
+- Aplicación desplegada: https://caja-clara-chi.vercel.app/
 
 ## Documentación académica
 

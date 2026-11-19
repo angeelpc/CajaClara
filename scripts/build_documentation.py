@@ -155,6 +155,13 @@ def set_repeat_table_header(row):
     tr_pr.append(tbl_header)
 
 
+def set_row_cant_split(row):
+    tr_pr = row._tr.get_or_add_trPr()
+    cant_split = OxmlElement("w:cantSplit")
+    cant_split.set(qn("w:val"), "true")
+    tr_pr.append(cant_split)
+
+
 def add_page_number(paragraph):
     run = paragraph.add_run()
     begin = OxmlElement("w:fldChar")
@@ -187,6 +194,7 @@ def add_table(doc, headers, rows, widths=None):
     table.autofit = False
     header_row = table.rows[0]
     set_repeat_table_header(header_row)
+    set_row_cant_split(header_row)
     for index, header in enumerate(headers):
         cell = header_row.cells[index]
         cell.text = str(header)
@@ -204,7 +212,9 @@ def add_table(doc, headers, rows, widths=None):
             run.font.size = Pt(9.5)
 
     for row_index, values in enumerate(rows):
-        cells = table.add_row().cells
+        row = table.add_row()
+        set_row_cant_split(row)
+        cells = row.cells
         for index, value in enumerate(values):
             cell = cells[index]
             cell.text = str(value)
@@ -238,6 +248,9 @@ def add_number(doc, text):
 
 def add_heading(doc, text, level=1):
     paragraph = doc.add_heading(text, level=level)
+    paragraph.paragraph_format.left_indent = Inches(0)
+    paragraph.paragraph_format.right_indent = Inches(0)
+    paragraph.paragraph_format.first_line_indent = Inches(0)
     paragraph.paragraph_format.keep_with_next = True
     return paragraph
 
@@ -356,7 +369,7 @@ def build_document():
     intro = doc.add_paragraph()
     intro.add_run(
         "En este documento explico la aplicación que desarrollé para administrar productos de un negocio que prepara cajas de regalo personalizadas. "
-        "Implementé registro e inicio de sesión, protección con JWT, un CRUD de productos, pruebas unitarias y una propuesta de despliegue continuo."
+        "Implementé registro e inicio de sesión, protección con JWT, un CRUD de productos, pruebas unitarias y un despliegue continuo funcional."
     )
     intro.paragraph_format.space_after = Pt(28)
 
@@ -365,7 +378,7 @@ def build_document():
         ("Tipo de solución", "Aplicación web de inventario"),
         ("Tecnologías", "Node.js, Express.js, MongoDB Atlas y Jest"),
         ("Plataforma elegida", "Vercel"),
-        ("Fecha", "18 de noviembre de 2026"),
+        ("Fecha", "19 de noviembre de 2026"),
     ]
     add_table(doc, ["Dato", "Descripción"], metadata, widths=[1.8, 5.0])
 
@@ -373,8 +386,8 @@ def build_document():
     conclusion.paragraph_format.space_before = Pt(24)
     conclusion.add_run("Resultado principal  ").bold = True
     conclusion.add_run(
-        "El proyecto queda listo para conectarse a MongoDB Atlas y publicarse cuando se configuren las credenciales externas. "
-        "La solución local ya cuenta con pruebas automatizadas y una interfaz adaptable."
+        "El proyecto está publicado en Vercel, conectado a MongoDB Atlas y protegido con variables de entorno. "
+        "GitHub Actions ejecuta las pruebas y publica la versión de producción de forma automática."
     )
 
     doc.add_page_break()
@@ -562,7 +575,7 @@ def build_document():
 
     add_heading(doc, "Revisión de dependencias", 2)
     doc.add_paragraph(
-        "Ejecuté la auditoría de pnpm sobre las dependencias de producción. El resultado no reportó vulnerabilidades conocidas al 18 de noviembre de 2026."
+        "Ejecuté la auditoría de pnpm sobre las dependencias de producción. El resultado no reportó vulnerabilidades conocidas al 19 de noviembre de 2026."
     )
 
     add_heading(doc, "Despliegue y elección de Vercel", 1)
@@ -632,8 +645,9 @@ def build_document():
     add_hyperlink(repo_paragraph, "Abrir repositorio CajaClara", "https://github.com/angeelpc/CajaClara")
     deploy_paragraph = doc.add_paragraph()
     deploy_paragraph.add_run("Aplicación en Vercel  ").bold = True
-    deploy_paragraph.add_run("Pendiente de publicación hasta configurar MongoDB Atlas y la cuenta de Vercel.")
+    add_hyperlink(deploy_paragraph, "Abrir CajaClara en Vercel", "https://caja-clara-chi.vercel.app/")
 
+    doc.add_page_break()
     add_heading(doc, "Archivos principales", 2)
     files_rows = [
         ("README.md", "Instrucciones, endpoints, variables y pasos de despliegue."),
@@ -649,8 +663,8 @@ def build_document():
 
     add_heading(doc, "Conclusión", 2)
     doc.add_paragraph(
-        "Con CajaClara cumplí el CRUD de productos, la autenticación y autorización con JWT, la persistencia preparada para MongoDB Atlas, las pruebas con Jest y la automatización de CI/CD. "
-        "Además, presenté la solución como un inventario con un propósito comercial concreto. Para finalizar la entrega pública sólo falta autenticar las cuentas externas, crear el clúster y sustituir los dos enlaces pendientes por las URL reales."
+        "Con CajaClara cumplí el CRUD de productos, la autenticación y autorización con JWT, la persistencia activa en MongoDB Atlas, las pruebas con Jest y la automatización de CI/CD. "
+        "Además, presenté la solución como un inventario con un propósito comercial concreto y comprobé el despliegue público desde GitHub Actions hasta Vercel."
     )
 
     doc.save(DOCX_PATH)
