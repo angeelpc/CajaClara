@@ -1,0 +1,12 @@
+# CajaClara
+
+CajaClara es una aplicación educativa para gestionar el inventario de productos de negocios que preparan cajas de regalo.
+
+## Páginas principales
+
+- `/` muestra el acceso y el panel de inventario.
+- `/api/health` informa el estado del servicio.
+
+## Acceso a datos
+
+Las rutas de productos requieren una cuenta y un token JWT. Cada usuario sólo puede consultar y modificar su propio inventario.

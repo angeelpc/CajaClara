@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CajaClara ayuda a negocios de regalos a controlar productos, precios y existencias.">
+  <title>CajaClara | Inventario para cajas de regalo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+
+  <main id="auth-view" class="auth-shell">
+    <div class="brand-panel">
+      <a class="brand" href="/">
+        <span class="brand-mark" aria-hidden="true">CC</span>
+        <span>CajaClara</span>
+      </a>
+      <div class="brand-copy">
+        <p class="eyebrow">Inventario para negocios creativos</p>
+        <h1>Ten claro qué puedes incluir en cada regalo.</h1>
+        <p class="lead">Administra insumos, existencias y precios desde un solo lugar. Diseñado para pequeños negocios que preparan cajas de regalo personalizadas.</p>
+      </div>
+      <ul class="benefit-list" aria-label="Beneficios principales">
+        <li><span aria-hidden="true">01</span> Productos separados por cada cuenta</li>
+        <li><span aria-hidden="true">02</span> Alertas visuales para existencias bajas</li>
+        <li><span aria-hidden="true">03</span> Acceso protegido con una sesión JWT</li>
+      </ul>
+    </div>
+
+    <div class="auth-panel">
+      <div class="auth-card">
+        <div class="auth-tabs" role="tablist" aria-label="Acceso a la cuenta">
+          <button id="login-tab" class="tab-button is-active" type="button" role="tab" aria-selected="true" aria-controls="login-form">Iniciar sesión</button>
+          <button id="register-tab" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="register-form">Crear cuenta</button>
+        </div>
+
+        <div class="form-intro">
+          <p class="eyebrow">Tu espacio de trabajo</p>
+          <h2 id="auth-title">Bienvenido de nuevo</h2>
+          <p id="auth-description">Ingresa para consultar y actualizar tu inventario.</p>
+        </div>
+
+        <form id="login-form" class="auth-form" novalidate>
+          <label for="login-email">Correo electrónico</label>
+          <input id="login-email" name="email" type="email" autocomplete="email" placeholder="nombre@negocio.com" required>
+          <label for="login-password">Contraseña</label>
+          <input id="login-password" name="password" type="password" autocomplete="current-password" placeholder="Mínimo 8 caracteres" required>
+          <p class="form-error" data-error-for="login" role="alert"></p>
+          <button class="primary-button full-width" type="submit">Entrar a mi inventario</button>
+        </form>
+
+        <form id="register-form" class="auth-form is-hidden" novalidate>
+          <label for="register-name">Nombre</label>
+          <input id="register-name" name="name" type="text" autocomplete="name" placeholder="Tu nombre" minlength="2" maxlength="80" required>
+          <label for="register-email">Correo electrónico</label>
+          <input id="register-email" name="email" type="email" autocomplete="email" placeholder="nombre@negocio.com" required>
+          <label for="register-password">Contraseña</label>
+          <input id="register-password" name="password" type="password" autocomplete="new-password" placeholder="Incluye letras y números" minlength="8" required>
+          <p class="field-hint">Usa entre 8 y 72 caracteres, con al menos una letra y un número.</p>
+          <p class="form-error" data-error-for="register" role="alert"></p>
+          <button class="primary-button full-width" type="submit">Crear mi cuenta</button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <section id="app-view" class="app-shell is-hidden">
+    <header class="app-header">
+      <a class="brand brand-dark" href="/" aria-label="CajaClara inventario">
+        <span class="brand-mark" aria-hidden="true">CC</span>
+        <span>CajaClara</span>
+      </a>
+      <div class="account-actions">
+        <div class="account-copy">
+          <span id="user-name">Mi cuenta</span>
+          <small id="user-email"></small>
+        </div>
+        <button id="logout-button" class="text-button" type="button">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <main class="dashboard">
+      <div class="dashboard-heading">
+        <div>
+          <p class="eyebrow">Panel de inventario</p>
+          <h1>Productos disponibles</h1>
+          <p>Consulta el inventario y mantén al día cada producto de tus cajas.</p>
+        </div>
+        <button id="open-product-modal" class="primary-button" type="button">Agregar producto</button>
+      </div>
+
+      <section class="metrics-grid" aria-label="Resumen del inventario">
+        <article class="metric-card metric-primary">
+          <span>Productos activos</span>
+          <strong id="metric-active">0</strong>
+          <small>Listos para usarse</small>
+        </article>
+        <article class="metric-card">
+          <span>Unidades registradas</span>
+          <strong id="metric-stock">0</strong>
+          <small>Suma del inventario visible</small>
+        </article>
+        <article class="metric-card">
+          <span>Existencia baja</span>
+          <strong id="metric-low-stock">0</strong>
+          <small>Productos con 5 unidades o menos</small>
+        </article>
+      </section>
+
+      <section class="inventory-panel">
+        <div class="inventory-toolbar">
+          <div>
+            <h2>Catálogo</h2>
+            <p id="result-count">Cargando productos...</p>
+          </div>
+          <div class="filters">
+            <label class="search-field" for="search-products">
+              <span class="sr-only">Buscar por nombre o SKU</span>
+              <input id="search-products" type="search" placeholder="Buscar nombre o SKU">
+            </label>
+            <label for="category-filter" class="sr-only">Filtrar por categoría</label>
+            <select id="category-filter">
+              <option value="">Todas las categorías</option>
+              <option>Cajas y empaques</option>
+              <option>Alimentos</option>
+              <option>Bebidas</option>
+              <option>Cuidado personal</option>
+              <option>Decoración</option>
+              <option>Papelería</option>
+              <option>Otro</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Producto</th>
+                <th scope="col">Categoría</th>
+                <th scope="col">Precio</th>
+                <th scope="col">Existencia</th>
+                <th scope="col">Estado</th>
+                <th scope="col"><span class="sr-only">Acciones</span></th>
+              </tr>
+            </thead>
+            <tbody id="product-table-body"></tbody>
+          </table>
+          <div id="loading-state" class="table-state">
+            <span class="spinner" aria-hidden="true"></span>
+            <p>Consultando tu inventario...</p>
+          </div>
+          <div id="empty-state" class="table-state is-hidden">
+            <span class="empty-icon" aria-hidden="true">+</span>
+            <h3>Tu inventario está listo para comenzar</h3>
+            <p>Agrega el primer producto que usas para preparar tus cajas.</p>
+            <button id="empty-add-button" class="secondary-button" type="button">Agregar primer producto</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </section>
+
+  <dialog id="product-dialog" class="product-dialog">
+    <form id="product-form" method="dialog" autocomplete="off" novalidate>
+      <div class="dialog-heading">
+        <div>
+          <p class="eyebrow">Inventario</p>
+          <h2 id="dialog-title">Agregar producto</h2>
+        </div>
+        <button id="close-product-modal" class="icon-button" type="button" aria-label="Cerrar formulario">×</button>
+      </div>
+
+      <input id="product-id" name="id" type="hidden">
+      <div class="form-grid">
+        <div class="form-field field-wide">
+          <label for="product-name">Nombre del producto</label>
+          <input id="product-name" name="name" type="text" autocomplete="off" placeholder="Ej. Vela aromática de vainilla" minlength="2" maxlength="100" required>
+        </div>
+        <div class="form-field">
+          <label for="product-sku">SKU</label>
+          <input id="product-sku" name="sku" type="text" autocomplete="off" placeholder="VELA-001" minlength="2" maxlength="32" required>
+        </div>
+        <div class="form-field">
+          <label for="product-category">Categoría</label>
+          <select id="product-category" name="category" autocomplete="off" required>
+            <option value="">Selecciona una opción</option>
+            <option>Cajas y empaques</option>
+            <option>Alimentos</option>
+            <option>Bebidas</option>
+            <option>Cuidado personal</option>
+            <option>Decoración</option>
+            <option>Papelería</option>
+            <option>Otro</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="product-price">Precio unitario</label>
+          <div class="money-input"><span aria-hidden="true">$</span><input id="product-price" name="price" type="number" autocomplete="off" min="0" max="1000000" step="0.01" placeholder="0.00" required></div>
+        </div>
+        <div class="form-field">
+          <label for="product-stock">Existencia</label>
+          <input id="product-stock" name="stock" type="number" autocomplete="off" min="0" max="1000000" step="1" placeholder="0" required>
+        </div>
+        <div class="form-field field-wide">
+          <label for="product-description">Descripción</label>
+          <textarea id="product-description" name="description" autocomplete="off" rows="3" maxlength="500" placeholder="Describe el producto o indica en qué tipo de caja lo utilizas."></textarea>
+        </div>
+        <div class="form-field field-wide">
+          <label for="product-status">Estado</label>
+          <select id="product-status" name="status" autocomplete="off">
+            <option value="active">Activo</option>
+            <option value="archived">Archivado</option>
+          </select>
+        </div>
+      </div>
+      <p class="form-error" data-error-for="product" role="alert"></p>
+      <div class="dialog-actions">
+        <button id="cancel-product" class="text-button" type="button">Cancelar</button>
+        <button class="primary-button" type="submit">Guardar producto</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
