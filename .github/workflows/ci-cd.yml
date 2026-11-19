@@ -21,15 +21,15 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Descargar repositorio
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Configurar pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         with:
           version: 11.25.0
 
       - name: Configurar Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22.13
           cache: pnpm
@@ -47,31 +47,50 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
+      - name: Verificar configuración de Vercel
+        id: vercel
+        shell: bash
+        run: |
+          if [[ -n "$VERCEL_TOKEN" && -n "$VERCEL_ORG_ID" && -n "$VERCEL_PROJECT_ID" ]]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::El despliegue se omitió porque todavía faltan los secretos de Vercel."
+          fi
+
       - name: Descargar repositorio
-        uses: actions/checkout@v4
+        if: steps.vercel.outputs.ready == 'true'
+        uses: actions/checkout@v7
 
       - name: Configurar pnpm
-        uses: pnpm/action-setup@v4
+        if: steps.vercel.outputs.ready == 'true'
+        uses: pnpm/action-setup@v6
         with:
           version: 11.25.0
 
       - name: Configurar Node.js
-        uses: actions/setup-node@v4
+        if: steps.vercel.outputs.ready == 'true'
+        uses: actions/setup-node@v7
         with:
           node-version: 22.13
           cache: pnpm
 
       - name: Instalar dependencias
+        if: steps.vercel.outputs.ready == 'true'
         run: pnpm install --frozen-lockfile
 
       - name: Descargar configuración de Vercel
-        run: pnpm dlx vercel@latest pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        if: steps.vercel.outputs.ready == 'true'
+        run: pnpm dlx vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN"
 
       - name: Construir artefactos de producción
-        run: pnpm dlx vercel@latest build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        if: steps.vercel.outputs.ready == 'true'
+        run: pnpm dlx vercel@latest build --prod --token="$VERCEL_TOKEN"
 
       - name: Publicar artefactos
-        run: pnpm dlx vercel@latest deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        if: steps.vercel.outputs.ready == 'true'
+        run: pnpm dlx vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN"
